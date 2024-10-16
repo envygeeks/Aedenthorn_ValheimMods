@@ -39,7 +39,7 @@ namespace CraftFromContainers
         public static ConfigEntry<string> preventModKey;
         public static ConfigEntry<string> fillAllModKey;
         public static ConfigEntry<bool> switchPrevent;
-        
+
         public static ConfigEntry<bool> ignoreShipContainers;
         public static ConfigEntry<bool> ignoreWagonContainers;
         public static ConfigEntry<bool> ignoreWoodChests;
@@ -61,7 +61,7 @@ namespace CraftFromContainers
         public static List<Container> cachedContainerList = new List<Container>();
 
         private static BepInExPlugin context = null;
-        
+
         private static bool skip;
 
         public class ConnectionParams
@@ -170,7 +170,7 @@ namespace CraftFromContainers
                     )
                 {
                     //container.GetComponent<ZNetView>()?.ClaimOwnership();
-                    
+
                     containers.Add(container);
                 }
             }
@@ -303,15 +303,16 @@ namespace CraftFromContainers
                             c.GetInventory().RemoveItem(__instance.m_fuelItem.m_itemData.m_shared.m_name, amount);
                             typeof(Container).GetMethod("Save", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(c, new object[] { });
                             //typeof(Inventory).GetMethod("Changed", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(c.GetInventory(), new object[] { });
-                            
+
                             if(__result)
                                 user.Message(MessageHud.MessageType.Center, Localization.instance.Localize("$msg_fireadding", new string[]{__instance.m_fuelItem.m_itemData.m_shared.m_name}), 0, null);
-                            
+
                             for(int i = 0; i < amount; i++)
                                 ___m_nview.InvokeRPC("AddFuel", new object[] { });
                             
+
                             __result = false;
-                            
+
                             if(!pullAll || Mathf.CeilToInt(___m_nview.GetZDO().GetFloat("fuel", 0f)) >= __instance.m_maxFuel)
                                 return false;
                         }
@@ -454,7 +455,7 @@ namespace CraftFromContainers
                 Dictionary<string, int> added = new Dictionary<string, int>();
 
                 List<Container> nearbyContainers = GetNearbyContainers(__instance.transform.position);
-                
+
                 foreach (Smelter.ItemConversion itemConversion in __instance.m_conversion)
                 {
                     if (Traverse.Create(__instance).Method("GetQueueSize").GetValue<int>() >= __instance.m_maxOre || (added.Any() && !pullAll))
@@ -518,7 +519,7 @@ namespace CraftFromContainers
                             user.Message(MessageHud.MessageType.TopLeft, $"$msg_added {amount} {name}", 0, null);
 
                             if (Traverse.Create(__instance).Method("GetQueueSize").GetValue<int>() >= __instance.m_maxOre || !pullAll)
-                                break; 
+                                break;
                         }
                     }
                 }
@@ -538,7 +539,7 @@ namespace CraftFromContainers
                 return false;
             }
         }
-        
+
 
         [HarmonyPatch(typeof(Smelter), "OnAddFuel")]
         static class Smelter_OnAddFuel_Patch
@@ -617,11 +618,11 @@ namespace CraftFromContainers
                     user.Message(MessageHud.MessageType.Center, "$msg_noprocessableitems", 0, null);
                 else
                     user.Message(MessageHud.MessageType.Center, $"$msg_added {added} {__instance.m_fuelItem.m_itemData.m_shared.m_name}", 0, null);
-                
+
                 return __result;
             }
         }
-        
+
         // fix flashing red text, add amounts
 
         [HarmonyPatch(typeof(InventoryGui), "SetupRequirement")]
@@ -675,7 +676,7 @@ namespace CraftFromContainers
         static class HaveRequirementItems_Patch
         {
             static void Postfix(Player __instance, ref bool __result, Recipe piece, bool discover, int qualityLevel, HashSet<string> ___m_knownMaterial)
-            { 
+            {
                 if (!modEnabled.Value || __result || discover || !AllowByKey())
                     return;
 
@@ -701,7 +702,7 @@ namespace CraftFromContainers
                 __result = true;
             }
         }
-        
+
         [HarmonyPatch(typeof(Player), "UpdateKnownRecipesList")]
         static class UpdateKnownRecipesList_Patch
         {
@@ -955,7 +956,7 @@ namespace CraftFromContainers
                             Vector3 connectionStartPos = station.GetConnectionEffectPoint();
                             Vector3 connectionEndPos = placementGhost.transform.position + Vector3.up * ghostConnectionStartOffset.Value;
 
-                            ConnectionParams tempConnection = null;    
+                            ConnectionParams tempConnection = null;
                             if (!connectionAlreadyExists)
                             {
                                 tempConnection = new ConnectionParams();
@@ -1075,7 +1076,7 @@ namespace CraftFromContainers
                 return true;
             }
         }
-        
+
         [HarmonyPatch(typeof(Turret), nameof(Turret.UseItem))]
         static class Turret_UseItem_Patch
         {

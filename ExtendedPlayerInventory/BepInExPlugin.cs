@@ -25,14 +25,14 @@ namespace ExtendedPlayerInventory
         public static ConfigEntry<bool> showGearInMenu;
         public static ConfigEntry<bool> displayEquipmentRowSeparate;
         public static ConfigEntry<int> extraRows;
-        
+
         public static ConfigEntry<string> helmetText;
         public static ConfigEntry<string> chestText;
         public static ConfigEntry<string> legsText;
         public static ConfigEntry<string> backText;
         public static ConfigEntry<string> utilityText;
         public static ConfigEntry<float> quickAccessScale;
-        
+
         public static ConfigEntry<string> hotKey1;
         public static ConfigEntry<string> hotKey2;
         public static ConfigEntry<string> hotKey3;
@@ -40,13 +40,13 @@ namespace ExtendedPlayerInventory
         public static ConfigEntry<string> modKeyTwo;
 
         public static ConfigEntry<string>[] hotkeys;
-        
+
         private static ConfigEntry<float> quickAccessX;
         private static ConfigEntry<float> quickAccessY;
 
         private static GameObject elementPrefab;
-        
-        private static ItemDrop.ItemData.ItemType[] typeEnums = new ItemDrop.ItemData.ItemType[] 
+
+        private static ItemDrop.ItemData.ItemType[] typeEnums = new ItemDrop.ItemData.ItemType[]
         {
             ItemDrop.ItemData.ItemType.Helmet,
             ItemDrop.ItemData.ItemType.Chest,
@@ -54,8 +54,8 @@ namespace ExtendedPlayerInventory
             ItemDrop.ItemData.ItemType.Shoulder,
             ItemDrop.ItemData.ItemType.Utility,
         };
-        
-        private static FieldInfo[] fields = new FieldInfo[] 
+
+        private static FieldInfo[] fields = new FieldInfo[]
         {
             AccessTools.Field(typeof(Humanoid), "m_helmetItem"),
             AccessTools.Field(typeof(Humanoid), "m_chestItem"),
@@ -90,9 +90,9 @@ namespace ExtendedPlayerInventory
             legsText = Config.Bind<string>("Strings", "LegsText", "Legs", "Text to show for legs slot.");
             backText = Config.Bind<string>("Strings", "BackText", "Back", "Text to show for back slot.");
             utilityText = Config.Bind<string>("Strings", "UtilityText", "Utility", "Text to show for utility slot.");
-            
+
             quickAccessScale = Config.Bind<float>("Misc", "QuickAccessScale", 1, "Scale of quick access bar.");
-            
+
             hotKey1 = Config.Bind<string>("Hotkeys", "HotKey1", "v", "Hotkey 1 - Use https://docs.unity3d.com/Manual/ConventionalGameInput.html");
             hotKey2 = Config.Bind<string>("Hotkeys", "HotKey2", "b", "Hotkey 2 - Use https://docs.unity3d.com/Manual/ConventionalGameInput.html");
             hotKey3 = Config.Bind<string>("Hotkeys", "HotKey3", "n", "Hotkey 3 - Use https://docs.unity3d.com/Manual/ConventionalGameInput.html");
@@ -111,8 +111,10 @@ namespace ExtendedPlayerInventory
                 hotKey3,
             };
 
-            harmony = new Harmony(Info.Metadata.GUID);
-            harmony.PatchAll();
+            if (!modEnabled.Value)
+                return;
+
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), null);
         }
 
         [HarmonyPatch(typeof(Player), "Awake")]
@@ -130,7 +132,7 @@ namespace ExtendedPlayerInventory
                 __instance.m_tombstone.GetComponent<Container>().m_height = height;
             }
         }
-          
+
         [HarmonyPatch(typeof(TombStone), "Awake")]
         static class TombStone_Awake_Patch
         {
@@ -147,7 +149,7 @@ namespace ExtendedPlayerInventory
                 //Dbgl($"tombstone Awake {__instance.GetComponent<Container>().GetInventory()?.GetHeight()}");
             }
         }
-                     
+
         [HarmonyPatch(typeof(TombStone), "Interact")]
         static class TombStone_Interact_Patch
         {
@@ -174,7 +176,7 @@ namespace ExtendedPlayerInventory
                 t.Field("m_lastDataString").SetValue(dataString);
             }
         }
-                
+
         [HarmonyPatch(typeof(Inventory), "MoveInventoryToGrave")]
         static class MoveInventoryToGrave_Patch
         {
@@ -243,7 +245,7 @@ namespace ExtendedPlayerInventory
             }
 
         }
-        
+
         [HarmonyPatch(typeof(Humanoid), "UnequipItem")]
         static class Humanoid_UnequipItem_Patch
         {
@@ -401,7 +403,7 @@ namespace ExtendedPlayerInventory
 
             }
         }
-        
+
         [HarmonyPatch(typeof(InventoryGui), "Update")]
         static class InventoryGui_Update_Patch
         {
@@ -487,7 +489,7 @@ namespace ExtendedPlayerInventory
                 t.GetComponent<RectTransform>().anchoredPosition = new Vector2(32, -10);
             }
         }
-        
+
         [HarmonyPatch(typeof(Inventory), "FindEmptySlot")]
         static class FindEmptySlot_Patch
         {
@@ -508,7 +510,7 @@ namespace ExtendedPlayerInventory
                 ___m_height++;
             }
         }
-        
+
         [HarmonyPatch(typeof(Inventory), "GetEmptySlots")]
         static class GetEmptySlots_Patch
         {
@@ -539,7 +541,7 @@ namespace ExtendedPlayerInventory
                 return false;
             }
         }
-        
+
         [HarmonyPatch(typeof(Inventory), "AddItem", new Type[] { typeof(ItemDrop.ItemData) })]
         static class Inventory_AddItem_Patch1
         {
@@ -655,7 +657,7 @@ namespace ExtendedPlayerInventory
                 if (AedenthornUtils.CheckKeyHeld(modKeyOne.Value) && AedenthornUtils.CheckKeyHeld(modKeyTwo.Value))
                 {
 
-                   
+
                     Rect quickSlotsRect = Rect.zero;
                     if (hudRoot.Find("QuickAccessBar")?.GetComponent<RectTransform>() != null)
                     {
@@ -666,7 +668,7 @@ namespace ExtendedPlayerInventory
                             hudRoot.Find("QuickAccessBar").GetComponent<RectTransform>().sizeDelta.y * gameScale * quickAccessScale.Value
                         );
                     }
-                    
+
                     if (quickSlotsRect.Contains(lastMousePos) && (currentlyDragging == "" || currentlyDragging == "QuickAccessBar"))
                     {
                         quickAccessX.Value += (mousePos.x - lastMousePos.x) / gameScale;

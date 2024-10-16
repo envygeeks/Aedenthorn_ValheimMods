@@ -97,7 +97,7 @@ namespace AutoFuel
 
         public static List<Container> GetNearbyContainers(Vector3 center, float range)
         {
-            try { 
+            try {
                 List<Container> containers = new List<Container>();
 
                 foreach (Collider collider in Physics.OverlapSphere(center, Mathf.Max(range, 0), LayerMask.GetMask(new string[] { "piece" })))

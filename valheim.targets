@@ -47,14 +47,14 @@
       </PropertyGroup>
     </When>
   </Choose>
-  
+
   <!-- Manual overrides -->
   <PropertyGroup>
     <BepInExPath>$(GamePath)\BepInEx</BepInExPath>
     <ManagedDataPath>$(GamePath)\valheim_Data\Managed</ManagedDataPath>
-    <UnityPath>$(GamePath)\unstripped_corlib</UnityPath>
+    <UnityPath>$(GamePath)\valheim_Data\Managed</UnityPath>
   </PropertyGroup>
-  
+
   <!-- Set start action -->
   <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
     <StartAction>Program</StartAction>
@@ -94,9 +94,9 @@
       <HintPath>$(ManagedDataPath)\assembly_guiutils.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ui_lib">
+    <Reference Include="gui_framework">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(ManagedDataPath)\ui_lib.dll</HintPath>
+      <HintPath>$(ManagedDataPath)\gui_framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="assembly_postprocessing">
