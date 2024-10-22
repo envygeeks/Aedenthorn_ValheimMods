@@ -112,6 +112,7 @@ namespace CraftFromContainers
 
             wasAllowed = !switchPrevent.Value;
 
+            // TODO: Why do we not disable this addon if it's disabled?
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), null);
 
             Dbgl("Mod awake");
@@ -183,7 +184,12 @@ namespace CraftFromContainers
         private static bool AllowContainerType(Container __instance)
         {
             Ship ship = __instance.gameObject.transform.parent?.GetComponent<Ship>();
-            return (!ignoreShipContainers.Value || ship is null) && (!ignoreWagonContainers.Value || __instance.m_wagon is null) && (!ignoreWoodChests.Value || !__instance.name.StartsWith("piece_chest_wood(")) && (!ignorePrivateChests.Value || !__instance.name.StartsWith("piece_chest_private(")) && (!ignoreBlackMetalChests.Value || !__instance.name.StartsWith("piece_chest_blackmetal(")) && (!ignoreReinforcedChests.Value || !__instance.name.StartsWith("piece_chest("));
+            return (!ignoreShipContainers.Value || ship is null)
+                   && (!ignoreWagonContainers.Value || __instance.m_wagon is null)
+                   && (!ignoreWoodChests.Value || !__instance.name.StartsWith("piece_chest_wood("))
+                   && (!ignorePrivateChests.Value || !__instance.name.StartsWith("piece_chest_private("))
+                   && (!ignoreBlackMetalChests.Value || !__instance.name.StartsWith("piece_chest_blackmetal("))
+                   && (!ignoreReinforcedChests.Value || !__instance.name.StartsWith("piece_chest("));
         }
 
         [HarmonyPatch(typeof(FejdStartup), "Awake")]
