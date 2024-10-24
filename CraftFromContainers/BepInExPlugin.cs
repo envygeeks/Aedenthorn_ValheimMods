@@ -699,6 +699,14 @@ namespace CraftFromContainers
                 {
                     if (requirement.m_resItem)
                     {
+
+                        // --
+                        // There is still a bug here
+                        // in that we do not multiply the
+                        // requirements by the amount provided upstream
+                        // and we really should be doing that
+                        // --
+
                         int needed = requirement.GetAmount(qualityLevel);
                         int invAmount = __instance.GetInventory().CountItems(requirement.m_resItem.m_itemData.m_shared.m_name);
                         if(invAmount < needed)
