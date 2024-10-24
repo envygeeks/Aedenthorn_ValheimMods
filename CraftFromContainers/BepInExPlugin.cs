@@ -677,29 +677,35 @@ namespace CraftFromContainers
 
 
 
-        [HarmonyPatch(typeof(Player), "HaveRequirementItems", new Type[] { typeof(Recipe), typeof(bool), typeof(int) })]
+        [
+            HarmonyPatch(typeof(Player), "HaveRequirementItems", new Type[]
+            {
+                typeof(Recipe),
+                typeof(bool),
+                typeof(int),
+                typeof(int)
+            })
+        ]
         static class HaveRequirementItems_Patch
         {
-            static void Postfix(Player __instance, ref bool __result, Recipe piece, bool discover, int qualityLevel, HashSet<string> ___m_knownMaterial)
+            static void Postfix(Player __instance, ref bool __result, Recipe piece, bool discover, int qualityLevel, int amount, HashSet<string> ___m_knownMaterial)
             {
                 if (!modEnabled.Value || __result || discover || !AllowByKey())
                     return;
 
                 var leaveMod = leaveOne.Value ? 1 : 0;
-
                 List<Container> nearbyContainers = GetNearbyContainers(__instance.transform.position);
-
                 foreach (Piece.Requirement requirement in piece.m_resources)
                 {
                     if (requirement.m_resItem)
                     {
-                        int amount = requirement.GetAmount(qualityLevel);
+                        int needed = requirement.GetAmount(qualityLevel);
                         int invAmount = __instance.GetInventory().CountItems(requirement.m_resItem.m_itemData.m_shared.m_name);
-                        if(invAmount < amount)
+                        if(invAmount < needed)
                         {
                             foreach(Container c in nearbyContainers)
                                 invAmount += c.GetInventory().CountItems(requirement.m_resItem.m_itemData.m_shared.m_name) - leaveMod;
-                            if (invAmount < amount)
+                            if (invAmount < needed)
                                 return;
                         }
                     }
