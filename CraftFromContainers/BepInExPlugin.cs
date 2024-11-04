@@ -699,16 +699,10 @@ namespace CraftFromContainers
                 {
                     if (requirement.m_resItem)
                     {
+                        int needed = requirement.GetAmount(qualityLevel) * amount;
+                        int invAmount = __instance.GetInventory().
+                            CountItems(requirement.m_resItem.m_itemData.m_shared.m_name);
 
-                        // --
-                        // There is still a bug here
-                        // in that we do not multiply the
-                        // requirements by the amount provided upstream
-                        // and we really should be doing that
-                        // --
-
-                        int needed = requirement.GetAmount(qualityLevel);
-                        int invAmount = __instance.GetInventory().CountItems(requirement.m_resItem.m_itemData.m_shared.m_name);
                         if(invAmount < needed)
                         {
                             foreach(Container c in nearbyContainers)
@@ -725,7 +719,6 @@ namespace CraftFromContainers
         [HarmonyPatch(typeof(Player), "UpdateKnownRecipesList")]
         static class UpdateKnownRecipesList_Patch
         {
-
             static void Prefix()
             {
                 skip = true;
@@ -736,10 +729,25 @@ namespace CraftFromContainers
             }
         }
 
-        [HarmonyPatch(typeof(Player), "HaveRequirements", new Type[] { typeof(Piece), typeof(Player.RequirementMode) })]
+        [
+            HarmonyPatch(typeof(Player), "HaveRequirements", new Type[]
+            {
+                typeof(Piece),
+                typeof(
+                    Player.RequirementMode
+                )
+            })
+        ]
         static class HaveRequirements_Patch
         {
-            static void Postfix(Player __instance, ref bool __result, Piece piece, Player.RequirementMode mode, HashSet<string> ___m_knownMaterial, Dictionary<string, int> ___m_knownStations)
+            static void Postfix(
+                Player __instance,
+                ref bool __result,
+                Piece piece,
+                Player.RequirementMode mode,
+                HashSet<string> ___m_knownMaterial,
+                Dictionary<string, int> ___m_knownStations
+            )
             {
                 if (!modEnabled.Value || __result || skip || __instance?.transform?.position == null || !AllowByKey())
                     return;
