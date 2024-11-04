@@ -1,45 +1,42 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <PropertyGroup>
-    <AssemblyName>$(ProjectName)</AssemblyName>
-    <RootNamespace>$(ProjectName)</RootNamespace>
-    <TargetFramework>net480</TargetFramework>
-    <Platforms>AnyCPU</Platforms>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <GamePath><!-- Set GamePath manually --></GamePath>
+    <AssemblyName>$(ProjectName)</AssemblyName>
     <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    <GamePath><!-- Set GamePath manually --></GamePath>
+    <RootNamespace>$(ProjectName)</RootNamespace>
+    <TargetFramework>net5.0</TargetFramework>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+  
+  <PropertyGroup Condition="$(Configuration) == 'Debug'">
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  
+  <PropertyGroup Condition="$(Configuration) == 'Release'">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
+    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\Release\</OutputPath>
     <WarningLevel>4</WarningLevel>
+    <Optimize>true</Optimize>
   </PropertyGroup>
-
-  <!-- Find GamePath -->
+  
   <Choose>
     <When Condition="($(OS) == 'Unix' OR $(OS) == 'OSX') AND $(GamePath) == ''">
       <PropertyGroup>
-        <GamePath Condition="!Exists('$(GamePath)')">$(HOME)/.steam/steam/steamapps/common/Valheim</GamePath>
-        <GamePath Condition="!Exists('$(GamePath)')">$(HOME)/Library/Application Support/Steam/steamapps/common/Valheim/Contents/MacOS</GamePath>
+        <GamePath>$(HOME)/Library/Application Support/Steam/steamapps/common/Valheim</GamePath>
       </PropertyGroup>
     </When>
     <When Condition="($(OS) == 'Windows_NT') AND $(GamePath) == ''">
       <PropertyGroup>
-        <GamePath Condition="!Exists('$(GamePath)')">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 892970', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))</GamePath>
+        <GamePath Condition="!Exists('$(GamePath)')">$([MSBuild]::GetRegistryValueFromView( 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 892970', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))</GamePath>
         <_SteamLibraryPath>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\SOFTWARE\Valve\Steam', 'SteamPath', null, RegistryView.Registry32))</_SteamLibraryPath>
         <GamePath Condition="!Exists('$(GamePath)') AND '$(_SteamLibraryPath)' != ''">$(_SteamLibraryPath)\steamapps\common\Valheim</GamePath>
         <GamePath Condition="!Exists('$(GamePath)')">C:\Program Files\Steam\steamapps\common\Valheim</GamePath>
@@ -48,17 +45,27 @@
     </When>
   </Choose>
 
-  <!-- Manual overrides -->
-  <PropertyGroup>
-    <BepInExPath>$(GamePath)\BepInEx</BepInExPath>
-    <ManagedDataPath>$(GamePath)\valheim_Data\Managed</ManagedDataPath>
-    <UnityPath>$(GamePath)\valheim_Data\Managed</UnityPath>
-  </PropertyGroup>
+  <Choose>
+    <When Condition="$(OS) == 'Unix' OR $(OS) == 'OSX'">
+      <PropertyGroup>
+        <BepInExPath>$(GamePath)/BepInEx</BepInExPath>
+        <ManagedDataPath>$(GamePath)/valheim.app/Contents/Resources/Data/Managed</ManagedDataPath>
+        <UnityPath>$(ManagedDataPath)</UnityPath>
+      </PropertyGroup>
+    </When>
+    <When Condition="($(OS) == 'Windows_NT') AND $(GamePath) == ''">
+      <PropertyGroup>
+        <BepInExPath>$(GamePath)\BepInEx</BepInExPath>
+        <ManagedDataPath>$(GamePath)\valheim_Data\Managed</ManagedDataPath>
+        <UnityPath>$(ManagedPath)</UnityPath>
+      </PropertyGroup>
+    </When>
+  </Choose>
 
-  <!-- Set start action -->
-  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+  <PropertyGroup>
     <StartAction>Program</StartAction>
-    <StartProgram>$(GamePath)\valheim.exe</StartProgram>
+    <StartProgram Condition="$(OS) == 'Unix' OR $(OS) == 'OSX'">$(GamePath)\valheim.app</StartProgram>
+    <StartProgram Condition="'$(OS)' == 'Windows_NT'">$(GamePath)\valheim.exe</StartProgram>
     <StartArguments>-console</StartArguments>
     <StartWorkingDirectory>$(GamePath)</StartWorkingDirectory>
   </PropertyGroup>
@@ -102,11 +109,6 @@
     <Reference Include="assembly_postprocessing">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ManagedDataPath)\assembly_postprocessing.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_steamworks">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(ManagedDataPath)\assembly_steamworks.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="assembly_sunshafts">
@@ -223,11 +225,6 @@
       <HintPath>$(UnityPath)\UnityEngine.TerrainModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.TextCoreModule">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(UnityPath)\UnityEngine.TextCoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(UnityPath)\UnityEngine.TextRenderingModule.dll</HintPath>
@@ -265,9 +262,19 @@
     <ItemGroup>
       <AllFiles Include="$(TargetDir)**\*.*" Exclude="$(TargetDir)**\*.pdb" />
     </ItemGroup>
-    <Copy SourceFiles="@(AllFiles)" DestinationFolder="$(GamePath)\BepInEx\plugins\%(RecursiveDir)"></Copy>
+    <!--
+      Disabled. I don't need this to be auto copied
+      to my Valheim folder, it's entirely unexpected when
+      I compile 180 addons to have them _all_ show up.
+      I'm keeping the source for _all_ updated but
+      only using a few of these addons
+      
+      <Copy 
+        SourceFiles="@(AllFiles)" 
+        DestinationFolder="$(GamePath)\BepInEx\plugins\%(RecursiveDir)" />
+    -->
     <Delete Files="$(ProjectDir)\bin\$(TargetName).zip" />
-    <Copy SourceFiles="@(AllFiles)" DestinationFolder="$(TargetDir)..\Release\%(RecursiveDir)"></Copy>
+    <Copy SourceFiles="@(AllFiles)" DestinationFolder="$(TargetDir)..\Release\%(RecursiveDir)"/>
     <ZipDirectory SourceDirectory="$(TargetDir)..\Release" DestinationFile="$(ProjectDir)\bin\$(TargetName).zip" />
     <RemoveDir Directories="$(TargetDir)..\Release" />
   </Target>
