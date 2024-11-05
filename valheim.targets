@@ -8,7 +8,7 @@
     <TargetFramework>net48</TargetFramework>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="$(Configuration) == 'Debug'">
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -18,7 +18,7 @@
     <WarningLevel>4</WarningLevel>
     <Optimize>false</Optimize>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="$(Configuration) == 'Release'">
     <DebugType>pdbonly</DebugType>
     <ErrorReport>prompt</ErrorReport>
@@ -27,7 +27,7 @@
     <WarningLevel>4</WarningLevel>
     <Optimize>true</Optimize>
   </PropertyGroup>
-  
+
   <Choose>
     <When Condition="($(OS) == 'Unix' OR $(OS) == 'OSX') AND $(GamePath) == ''">
       <PropertyGroup>
@@ -262,19 +262,10 @@
     <ItemGroup>
       <AllFiles Include="$(TargetDir)**\*.*" Exclude="$(TargetDir)**\*.pdb" />
     </ItemGroup>
-    <!--
-      Disabled. I don't need this to be auto copied
-      to my Valheim folder, it's entirely unexpected when
-      I compile 180 addons to have them _all_ show up.
-      I'm keeping the source for _all_ updated but
-      only using a few of these addons
-      
-      <Copy 
-        SourceFiles="@(AllFiles)" 
-        DestinationFolder="$(GamePath)\BepInEx\plugins\%(RecursiveDir)" />
-    -->
+    
     <Delete Files="$(ProjectDir)\bin\$(TargetName).zip" />
     <Copy SourceFiles="@(AllFiles)" DestinationFolder="$(TargetDir)..\Release\%(RecursiveDir)"/>
+    <Copy SourceFiles="@(AllFiles)" DestinationFolder="$(GamePath)\BepInEx\plugins\%(RecursiveDir)" />
     <ZipDirectory SourceDirectory="$(TargetDir)..\Release" DestinationFile="$(ProjectDir)\bin\$(TargetName).zip" />
     <RemoveDir Directories="$(TargetDir)..\Release" />
   </Target>
